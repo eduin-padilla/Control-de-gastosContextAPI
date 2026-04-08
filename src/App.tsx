@@ -1,21 +1,25 @@
 import BudgetForm from "./components/BudgetForm"
+import BudgetTraker from "./components/BudgetTraker"
+import ExpenseModal from "./components/ExpenseModal"
+import { useBudget } from "./hooks/useBudget"
 
 function App() {
-  
+  const { state } = useBudget()
+  const isValidBudget = state.budget > 0
 
   return (
     <>
       <header className="bg-blue-600 py-8 max-h-72"> 
-        <h1 className="uppercase text-center font-black text-4xl text-white ">
-          planificador de gastos 
+        <h1 className="uppercase text-center font-black text-4xl text-white">
+          planificador de gastos
         </h1>
       </header>
 
       <div className="max-w-3xl mx-auto bg-white shadow-lg rounded-lg p-10 mt-10"> 
-        <BudgetForm
-        
-        />
+        {isValidBudget ? <BudgetTraker /> : <BudgetForm />}
       </div>
+
+      {isValidBudget && <ExpenseModal />}
     </>
   )
 }
