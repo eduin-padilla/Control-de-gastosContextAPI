@@ -1,5 +1,5 @@
 export type Expense = {
-    id: number
+    id: string
     expenseName: string
     amount: number
     category: string
@@ -13,7 +13,7 @@ type ValuePiece = Date | null;
 export type Value = ValuePiece | [ValuePiece, ValuePiece];
 
 export type Category = {
-    id: number
+    id: string
     name: string
     icon: string
 }
