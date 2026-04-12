@@ -8,7 +8,6 @@ export default function BudgetForm() {
     const {dispatch} = useBudget()
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        
         setBudget(e.target.valueAsNumber || 0);
     };
     const isValid = useMemo(() => {
@@ -18,7 +17,7 @@ export default function BudgetForm() {
     const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        dispatch({type: "add-budget", payload: {budget}})
+        dispatch({type: 'add-budget', payload: {budget}})
     }
 
     return (
