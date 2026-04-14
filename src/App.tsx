@@ -1,11 +1,19 @@
+import { useEffect } from "react"
 import BudgetForm from "./components/BudgetForm"
 import BudgetTraker from "./components/BudgetTraker"
+import ExpenseList from "./components/ExpenseList"
 import ExpenseModal from "./components/ExpenseModal"
 import { useBudget } from "./hooks/useBudget"
 
 function App() {
   const { state } = useBudget()
   const isValidBudget = state.budget > 0
+  
+
+  useEffect(() => {
+  localStorage.setItem('budget', state.budget.toString())
+  localStorage.setItem('expense', JSON.stringify(state.expense))
+  },[state])
 
   return (
     <>
@@ -20,6 +28,8 @@ function App() {
       </div>
 
       {isValidBudget && <ExpenseModal />}
+
+      <ExpenseList />
     </>
   )
 }

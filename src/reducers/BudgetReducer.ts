@@ -1,24 +1,40 @@
 import type { DraftExpense, Expense } from "../types"
 import { v4 as  uuidv4 } from 'uuid'
 
-
-
 export type BudgetActions = 
   { type: 'add-budget', payload: {budget: number} } |
   {type:'show-modal'} |
   {type: 'close-modal'} |
-  {type: 'add-expense', payload: {expense: DraftExpense}}
+  {type: 'add-expense', payload: {expense: DraftExpense}} |
+  {type: 'remove-expense', payload: {id: Expense['id']}} | 
+  {type: 'edit-expense-by-id', payload: {id: Expense['id']}} |
+  {type: 'update-expense', payload: {expense: Expense}}
+
+  
 
 export type BudgetState = {
   budget: number,
-  modal: boolean
-  expense: Expense[]
+  modal: boolean,
+  expense: Expense[],
+  editingId: Expense["id"]
+}
+
+
+const initialBudget = () : number => {
+  const localStorageBudget = localStorage.getItem('budget')
+  return localStorageBudget ? +localStorageBudget : 0
+}
+const lolcalStorageExpense = () : Expense[] => {
+  const localStorageExpense = localStorage.getItem('expense')
+  return localStorageExpense ? JSON.parse(localStorageExpense) : []
+
 }
 
 export const initialState : BudgetState = {
-  budget: 0,
+  budget: initialBudget(),
   modal: false,
-  expense: []
+  expense: lolcalStorageExpense(),
+  editingId: ""
   
 }
 
@@ -51,7 +67,8 @@ export const budgetReducer = (
   if(action.type === 'close-modal') {
     return {
       ...state,
-      modal: false
+      modal: false,
+      editingId: ""
     }
   }
   if(action.type ===  'add-expense'){
@@ -62,6 +79,31 @@ export const budgetReducer = (
       ...state,
       expense: [...state.expense, expense],
       modal: false
+    }
+  }
+
+  if(action.type === 'remove-expense'){
+    return{ 
+      ...state,
+      expense: state.expense.filter(expense => expense.id !== action.payload.id)
+    }
+  }
+
+  if(action.type === 'edit-expense-by-id') {
+
+    return{
+      ...state,
+      editingId: action.payload.id,
+      modal: true 
+    }
+  }
+  if(action.type === 'update-expense') {
+
+    return {
+      ...state,
+      expense:  state.expense.map(expense => expense.id === action.payload.expense.id ? action.payload.expense : expense),
+      modal: false,
+      editingId: ""
     }
   }
 

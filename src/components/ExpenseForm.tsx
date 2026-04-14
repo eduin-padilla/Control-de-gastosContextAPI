@@ -1,4 +1,4 @@
-import {useState} from "react"
+import { useState} from "react"
 import type {DraftExpense, Value} from "../types"
 import { Categories } from "../data/Categories";
 import DatePicker from 'react-date-picker';
@@ -9,16 +9,24 @@ import { useBudget }  from "../hooks/useBudget";
 
 export default function ExpenseForm() {
 
-    const [expense, setExpense] = useState<DraftExpense>({
+
+    const emptyExpense: DraftExpense = {
         expenseName: '',
         amount: 0,
         category: '',
         date: new Date()
-    })
+    }
 
     const [error , setError] = useState<string>('')
+    
+    const {dispatch, state} = useBudget()
 
-    const {dispatch} = useBudget()
+    const [expense, setExpense] = useState<DraftExpense>(() => {
+        if (state.editingId) {
+            return state.expense.find(currenteExpense => currenteExpense.id === state.editingId) ?? emptyExpense
+        }
+        return emptyExpense
+    })
 
     //coonvirtiendo el valor del input a numero en caso de ser el campo de monto, de lo contrario se mantiene como string
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -48,8 +56,12 @@ export default function ExpenseForm() {
             setError('todos los campos son obligatorios')
             return 
         }
+        if(state.editingId) {
+            dispatch({type: 'update-expense', payload:{expense: {id: state.editingId, ...expense}}})
+        }else{
 
-        dispatch({type: 'add-expense', payload: {expense}})
+            dispatch({type: 'add-expense', payload: {expense}})
+        }
 
         //reiniciar formulario
         setExpense({
@@ -65,7 +77,7 @@ export default function ExpenseForm() {
     return (
         <>
             <form action="" className="space-y-5" onSubmit={handleSubmit}>
-                <legend className="uppercase text-center text-2xl font-black border-b-4 border-blue-500 py-2"> Nuevo gasto </legend>
+                <legend className="uppercase text-center text-2xl font-black border-b-4 border-blue-500 py-2"> {state.editingId ? 'Editar Gasto' : 'Nuevo Gasto'} </legend>
 
                 {error && <ErrorMessage>{error}</ErrorMessage>}
 
@@ -155,7 +167,7 @@ export default function ExpenseForm() {
 
                 <input
                 type="submit"
-                value={"Agregar Gasto"}
+                value={state.editingId ? 'Actualizar Gasto' : 'Agregar Gasto'}
                 className="bg-blue-500 hover:bg-blue-700 text-white font-bold w-full p-2 px-4 rounded-md cursor-pointer "
                 />
             </form>
