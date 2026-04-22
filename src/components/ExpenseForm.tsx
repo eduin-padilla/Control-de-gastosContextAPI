@@ -1,4 +1,4 @@
-import { useState} from "react"
+import { useState, useEffect} from "react"
 import type {DraftExpense, Value} from "../types"
 import { Categories } from "../data/Categories";
 import DatePicker from 'react-date-picker';
@@ -10,23 +10,29 @@ import { useBudget }  from "../hooks/useBudget";
 export default function ExpenseForm() {
 
 
-    const emptyExpense: DraftExpense = {
+    const [expense, setExpense] = useState<DraftExpense>({
         expenseName: '',
         amount: 0,
         category: '',
         date: new Date()
-    }
+    })
 
     const [error , setError] = useState<string>('')
     
-    const {dispatch, state} = useBudget()
+    const {dispatch, state, remainingBudget} = useBudget()
+    const [previusAmount,  setPreviusAmount] = useState(0)
 
-    const [expense, setExpense] = useState<DraftExpense>(() => {
-        if (state.editingId) {
-            return state.expense.find(currenteExpense => currenteExpense.id === state.editingId) ?? emptyExpense
+    useEffect(() => {
+        if(state.editingId) {
+            const editingExpense = state.expense.find(currenteExpense => currenteExpense.id === state.editingId)
+            if(editingExpense) {
+                // eslint-disable-next-line react-hooks/set-state-in-effect
+                setExpense(editingExpense)
+                setPreviusAmount(editingExpense.amount)
+            }
         }
-        return emptyExpense
-    })
+    },[state.editingId, state.expense])
+
 
     //coonvirtiendo el valor del input a numero en caso de ser el campo de monto, de lo contrario se mantiene como string
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -56,6 +62,11 @@ export default function ExpenseForm() {
             setError('todos los campos son obligatorios')
             return 
         }
+        if((expense.amount - previusAmount) > remainingBudget) {
+            setError('te estas pasando del presupuesto')
+            return
+        }
+
         if(state.editingId) {
             dispatch({type: 'update-expense', payload:{expense: {id: state.editingId, ...expense}}})
         }else{
@@ -70,6 +81,7 @@ export default function ExpenseForm() {
             category: '',
             date: new Date()
         })
+        setPreviusAmount(0)
 
     }
     
